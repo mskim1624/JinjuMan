@@ -213,7 +213,7 @@ public class TCPSever : MonoBehaviour
         switch (func)
         {
             case "start":
-                SendMessageToClient("start: load1,");
+                SendMessageToClient("start load1");
                 break;
             default:
                 SendMessageToClient(func + ",");
