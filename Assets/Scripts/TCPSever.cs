@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,16 +16,16 @@ public class TCPSever : MonoBehaviour
 {
     public class ClientData
     {
-        public ClientData(bool isConneted, UserStatus label, TcpClient client)
+        public ClientData(bool isConneted, UserStatus status, TcpClient client)
         {
             this.isConneted = isConneted;
-            Label = label;
-            Client = client;
+            this.status = status;
+            this.client = client;
         }
 
-        public TcpClient Client { get; set; }
+        public TcpClient client { get; set; }
         public bool isConneted { get; set; }
-        public UserStatus Label { get; set; }
+        public UserStatus status { get; set; }
     }
 
     TcpListener tcpListener;
@@ -73,9 +74,10 @@ public class TCPSever : MonoBehaviour
                         continue;
                     else
                     {
+                        item.Value.status.status.text = $"{item.Key}\n100%";
                         item.Value.isConneted = true;
-                        item.Value.Client = client;
-                        item.Value.Label.image.color = Color.green;
+                        item.Value.client = client;
+                        item.Value.status.image.color = Color.green;
                         break;
                     }
                 }
@@ -123,10 +125,10 @@ public class TCPSever : MonoBehaviour
 
                     foreach (var item in userStatus)
                     {
-                        if (item.Value.isConneted && clients[i].Item1 == item.Value.Client)
+                        if (item.Value.isConneted && clients[i].Item1 == item.Value.client)
                         {
                             item.Value.isConneted = false;
-                            item.Value.Label.image.color = Color.red;
+                            item.Value.status.image.color = Color.red;
                             break;
                         }
                     }
@@ -183,9 +185,9 @@ public class TCPSever : MonoBehaviour
     {
         foreach (var item in userStatus)
         {
-            if (item.Value.isConneted && client.Client == item.Value.Client.Client)
+            if (item.Value.isConneted && client.Client == item.Value.client.Client)
             {
-                item.Value.Label.status.text = $"{item.Key}\n{level}";
+                item.Value.status.status.text = $"{item.Key}\n{level}";
                 //item.Value.Label.TextAlign = ContentAlignment.MiddleCenter;
             }
         }
@@ -198,10 +200,10 @@ public class TCPSever : MonoBehaviour
     {
         foreach (KeyValuePair<int, ClientData> item in userStatus)
         {
-            if (item.Value.Client == null) continue;
+            if (item.Value.client == null) continue;
             if (item.Value.isConneted)
             {
-                StreamWriter clientWriter = new StreamWriter(item.Value.Client.GetStream()) { AutoFlush = true };
+                StreamWriter clientWriter = new StreamWriter(item.Value.client.GetStream()) { AutoFlush = true };
                 await clientWriter.WriteLineAsync(message);
             }
         }
@@ -211,7 +213,7 @@ public class TCPSever : MonoBehaviour
         switch (func)
         {
             case "start":
-                SendMessageToClient("start");
+                SendMessageToClient("start: load1,");
                 break;
             default:
                 SendMessageToClient(func + ",");
@@ -226,9 +228,9 @@ public class TCPSever : MonoBehaviour
     string GetLocalIPAddress()
     {
         string hostName = Dns.GetHostName();
-        IPHostEntry hostEntry = Dns.GetHostEntry(hostName);
+        IPAddress[] hostAddresses = Dns.GetHostAddresses(hostName);
 
-        foreach (IPAddress ipAddress in hostEntry.AddressList)
+        foreach (IPAddress ipAddress in hostAddresses)
         {
             if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
             {
