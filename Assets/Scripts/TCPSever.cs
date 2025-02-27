@@ -9,8 +9,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-
-
+using static UnityEditor.Progress;
 
 public class TCPSever : MonoBehaviour
 {
@@ -28,14 +27,15 @@ public class TCPSever : MonoBehaviour
         public UserStatus status { get; set; }
     }
 
-    TcpListener tcpListener;
+    private TcpListener tcpListener;
     public int currentVideoIndex;
 
-    List<(TcpClient, NetworkStream)> clients = new List<(TcpClient, NetworkStream)>();
-    Dictionary<int, ClientData> userStatus = new Dictionary<int, ClientData>();
+    private List<(TcpClient, NetworkStream)> clients = new List<(TcpClient, NetworkStream)>();
+    private Dictionary<int, ClientData> userStatus = new Dictionary<int, ClientData>();
 
     [SerializeField]
-    List<UserStatus> users = new List<UserStatus>();
+    private List<UserStatus> users = new List<UserStatus>();
+
     public List<ClientData> clientDatas = new List<ClientData>();
     public TMP_Text serverStatusText;
     public Image severStatusImage;
@@ -47,7 +47,6 @@ public class TCPSever : MonoBehaviour
             clientDatas.Add(new ClientData(false, users[i], null));
             userStatus.Add(i + 1, clientDatas[i]);
         }
-
 
         await StartServer();
     }
@@ -82,7 +81,6 @@ public class TCPSever : MonoBehaviour
                     }
                 }
 
-
                 var networkStream = client.GetStream();
 
                 lock (clients)
@@ -103,16 +101,15 @@ public class TCPSever : MonoBehaviour
         }
     }
 
-
-
     private async Task MonitorClientsAsync()
     {
         while (true)
         {
             CheckClientConnections();
-            await Task.Delay(TimeSpan.FromSeconds(5)); // 5ÃÊ¸¶´Ù ½ÇÇà
+            await Task.Delay(TimeSpan.FromSeconds(5)); // 5ì´ˆë§ˆë‹¤ ì‹¤í–‰
         }
     }
+
     private void CheckClientConnections()
     {
         lock (clients)
@@ -122,7 +119,6 @@ public class TCPSever : MonoBehaviour
                 var (client, stream) = clients[i];
                 if (!IsConnected(client))
                 {
-
                     foreach (var item in userStatus)
                     {
                         if (item.Value.isConneted && clients[i].Item1 == item.Value.client)
@@ -142,28 +138,30 @@ public class TCPSever : MonoBehaviour
             }
         }
     }
+
     private async Task ReceiveMessagesAsync(TcpClient client, NetworkStream stream)
     {
         byte[] buffer = new byte[1024];
-        string clientId = client.Client.RemoteEndPoint.ToString(); // Å¬¶óÀÌ¾ğÆ®ÀÇ ½Äº°ÀÚ·Î IP¿Í Æ÷Æ® »ç¿ë
+        string clientId = client.Client.RemoteEndPoint.ToString(); // í´ë¼ì´ì–¸íŠ¸ì˜ ì‹ë³„ìë¡œ IPì™€ í¬íŠ¸ ì‚¬ìš©
 
         while (true)
         {
             int bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length);
             if (bytesRead == 0)
             {
-                // Å¬¶óÀÌ¾ğÆ®°¡ ¿¬°áÀ» ²÷¾úÀ» °æ¿ì
+                // í´ë¼ì´ì–¸íŠ¸ê°€ ì—°ê²°ì„ ëŠì—ˆì„ ê²½ìš°
                 Console.WriteLine($"Client {clientId} disconnected.");
                 break;
             }
 
             string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
 
-            // ¸Ş½ÃÁö Ã³¸®
+            // ë©”ì‹œì§€ ì²˜ë¦¬
             BatteryLevel(message, client);
             //DebugBox(message);
         }
     }
+
     private bool IsConnected(TcpClient client)
     {
         try
@@ -172,7 +170,7 @@ public class TCPSever : MonoBehaviour
             if (client.Client.Poll(0, SelectMode.SelectRead))
             {
                 byte[] buff = new byte[1];
-                return client.Client.Receive(buff, SocketFlags.Peek) != 0; // ¿¬°áÀÌ ²÷¾îÁø °æ¿ì 0À» ¹İÈ¯
+                return client.Client.Receive(buff, SocketFlags.Peek) != 0; // ì—°ê²°ì´ ëŠì–´ì§„ ê²½ìš° 0ì„ ë°˜í™˜
             }
         }
         catch (SocketException)
@@ -181,6 +179,7 @@ public class TCPSever : MonoBehaviour
         }
         return true;
     }
+
     private void BatteryLevel(string level, TcpClient client)
     {
         foreach (var item in userStatus)
@@ -192,40 +191,53 @@ public class TCPSever : MonoBehaviour
             }
         }
     }
-    void OnApplicationQuit()
+
+    private void OnApplicationQuit()
     {
         tcpListener.Stop();
     }
-    async void SendMessageToClient(string message)
+
+    private void SendMessageToClient(string message)
     {
+        Debug.Log(message);
         foreach (KeyValuePair<int, ClientData> item in userStatus)
         {
             if (item.Value.client == null) continue;
             if (item.Value.isConneted)
             {
-                StreamWriter clientWriter = new StreamWriter(item.Value.client.GetStream()) { AutoFlush = true };
-                await clientWriter.WriteLineAsync(message);
+                SendMessageToAClient(item.Value.client);
             }
         }
+
+        async void SendMessageToAClient(TcpClient client)
+        {
+            var clientWriter = new StreamWriter(client.GetStream()) { AutoFlush = true };
+            await clientWriter.WriteLineAsync(message);
+        }
     }
+
+    public static int videoNum = 1;
+
     public void OnFuncButton(string func)
     {
         switch (func)
         {
             case "start":
-                SendMessageToClient("start load1");
+                SendMessageToClient($"start load{videoNum}");
                 break;
+
             default:
                 SendMessageToClient(func + ",");
                 break;
         }
-        Debug.Log(func);
     }
+
     public void OnCurrentVideo(int index)
     {
         currentVideoIndex = index;
     }
-    string GetLocalIPAddress()
+
+    private string GetLocalIPAddress()
     {
         string hostName = Dns.GetHostName();
         IPAddress[] hostAddresses = Dns.GetHostAddresses(hostName);

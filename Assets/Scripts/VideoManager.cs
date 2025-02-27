@@ -1,37 +1,39 @@
 #if UNITY_STANDALONE_WIN
 //using System.Windows.Forms;
 #endif
+
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using Application = UnityEngine.Application;
 
-
 public class VideoManager : MonoBehaviour
 {
-    static VideoManager instance;
+    private static VideoManager instance;
+
     public static VideoManager Instance
     {
-    set { instance = value; }
-    get { return instance; } 
+        set { instance = value; }
+        get { return instance; }
     }
-    string videoFolderPath;
+
+    private string videoFolderPath;
+
     [SerializeField]
-    List<VideoSelectButton> videoSelectButtons = new List<VideoSelectButton>();
-    
-    void Start()
+    private List<VideoSelectButton> videoSelectButtons = new List<VideoSelectButton>();
+
+    private void Start()
     {
-        videoFolderPath  = Path.Combine(Application.persistentDataPath, "Thumbnail");
+        videoFolderPath = Path.Combine(Application.persistentDataPath, "Thumbnail");
 
         if (!Directory.Exists(videoFolderPath))
-            Directory.CreateDirectory(videoFolderPath); 
+            Directory.CreateDirectory(videoFolderPath);
 
+        OnSelecteButton(TCPSever.videoNum);
     }
 
-    
-
-    void OpneFileDialog()
+    private void OpneFileDialog()
     {
         //using (OpenFileDialog openFileDialog = new OpenFileDialog())
         //{
@@ -46,7 +48,8 @@ public class VideoManager : MonoBehaviour
         //    }
         //}
     }
-    void LoadImage(string filePath)
+
+    private void LoadImage(string filePath)
     {
         byte[] fileData = System.IO.File.ReadAllBytes(filePath);
         Texture2D tex = new Texture2D(2, 2);
@@ -56,6 +59,7 @@ public class VideoManager : MonoBehaviour
 
     public void OnSelecteButton(int index)
     {
+        TCPSever.videoNum = index;
         foreach (VideoSelectButton button in videoSelectButtons)
         {
             if (button.index != index)
