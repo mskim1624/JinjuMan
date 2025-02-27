@@ -6,10 +6,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
 
 public class TCPSever : MonoBehaviour
 {
@@ -216,7 +214,7 @@ public class TCPSever : MonoBehaviour
         }
     }
 
-    public static int videoNum = 1;
+    public static int videoNum = -1;
 
     public void OnFuncButton(string func)
     {

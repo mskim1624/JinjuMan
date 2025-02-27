@@ -1,36 +1,31 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
-using System.Net;
 using System.Text.RegularExpressions;
-using UnityEngine.UI;
+using System.Threading;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using Unity.VisualScripting;
+using UnityEngine.UI;
 
 public class TCPClient : MonoBehaviour
 {
-    static string ipAddress;
+    private static string ipAddress;
 
-    TcpClient client;
-    NetworkStream stream;
-    StreamReader reader;
-    StreamWriter writer;
-    Thread clientThread;
-    bool isRunning;
+    private TcpClient client;
+    private NetworkStream stream;
+    private StreamReader reader;
+    private StreamWriter writer;
+    private Thread clientThread;
+    private bool isRunning;
 
-    byte[] receiveBuffer = new byte[1024];
-
+    private byte[] receiveBuffer = new byte[1024];
 
     //public Text txtIP;
     [SerializeField]
-    InputField txtIP;
+    private InputField txtIP;
+
     [SerializeField]
-    Button btnConnect;
+    private Button btnConnect;
 
     private Text logText;
     private ScrollRect scrollRect;
@@ -45,9 +40,11 @@ public class TCPClient : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    private const string SAVEIP = "SAVEIP";
+
     private void Start()
     {
-        txtIP.text = "127.0.0.1";
+        txtIP.text = PlayerPrefs.GetString(SAVEIP, "127.0.0.1");
         btnConnect.enabled = true;
 
         logText = GameObject.Find("log_Text").GetComponent<Text>();
@@ -55,7 +52,7 @@ public class TCPClient : MonoBehaviour
 
         if (logText != null)
         {
-            TextLogMsg("Á¢¼ÓÀ» ±â´Ù¸®°í ÀÖ½À´Ï´Ù...");
+            TextLogMsg("ì ‘ì†ì„ ê¸°ë‹¤ë¦¬ê³  ìˆìŠµë‹ˆë‹¤...");
         }
     }
 
@@ -82,13 +79,13 @@ public class TCPClient : MonoBehaviour
         return isIP && isInRange;
     }
 
-    bool IsValidIP(string ip)
+    private bool IsValidIP(string ip)
     {
         string pattern = @"^([0-9]{1,3}\.){3}[0-9]{1,3}$";
         return Regex.IsMatch(ip, pattern);
     }
 
-    bool IsInRange(string ip)
+    private bool IsInRange(string ip)
     {
         var segments = ip.Split('.');
         foreach (var segment in segments)
@@ -109,13 +106,13 @@ public class TCPClient : MonoBehaviour
     {
         logText.text += msg + "\n";
     }
- 
+
     private void Update()
     {
         if (isConnected && (client == null || !client.Connected))
         {
             isConnected = false;
-            TextLogMsg("¼­¹ö¿ÍÀÇ ¿¬°áÀÌ ²÷¾îÁ³½À´Ï´Ù.");
+            TextLogMsg("ì„œë²„ì™€ì˜ ì—°ê²°ì´ ëŠì–´ì¡ŒìŠµë‹ˆë‹¤.");
             StartReconnection();
 
             return;
@@ -128,11 +125,10 @@ public class TCPClient : MonoBehaviour
                 ReadDataFromServer();
             }
         }
-
     }
-    void PlayerControl(string str)
-    {
 
+    private void PlayerControl(string str)
+    {
         //if (!player.isPlaying)
         //{
         //    if (str.Contains("load"))
@@ -140,7 +136,6 @@ public class TCPClient : MonoBehaviour
         //        string temp = str.Replace("start load", "");
         //        if (int.TryParse(temp, out int vedioNum))
         //        {
-
         //            if (vedioNum == 1 && player.videoUrlList.Count > 0 )
         //            {
         //                if (!player.videoUrl.Equals(player.videoUrlList[vedioNum - 1]))
@@ -181,12 +176,13 @@ public class TCPClient : MonoBehaviour
             stream = client.GetStream();
             isConnected = true;
             reconnecting = false;
-            TextLogMsg("¼­¹ö¿¡ ¿¬°áµÇ¾ú½À´Ï´Ù.");
-            OnSendMessageToServer("load:1,");
+            TextLogMsg("ì„œë²„ì— ì—°ê²°ë˜ì—ˆìŠµë‹ˆë‹¤.");
+            OnSendMessageToServer($"load:{TCPSever.videoNum},");
+            PlayerPrefs.SetString(SAVEIP, ipAddress);
         }
         catch (Exception e)
         {
-            TextLogMsg("¿¬°á ½ÇÆĞ: " + e.Message);
+            TextLogMsg("ì—°ê²° ì‹¤íŒ¨: " + e.Message);
         }
     }
 
@@ -201,11 +197,11 @@ public class TCPClient : MonoBehaviour
 
     private System.Collections.IEnumerator Reconnect()
     {
-        // ÀÏÁ¤ °£°İÀ¸·Î ÀçÁ¢¼Ó ½Ãµµ
+        // ì¼ì • ê°„ê²©ìœ¼ë¡œ ì¬ì ‘ì† ì‹œë„
         while (!isConnected)
         {
-            yield return new WaitForSeconds(5f); // 5ÃÊ¸¶´Ù ÀçÁ¢¼Ó ½Ãµµ
-            TextLogMsg("¼­¹ö¿¡ ÀçÁ¢¼ÓÀ» ½ÃµµÇÕ´Ï´Ù...");
+            yield return new WaitForSeconds(5f); // 5ì´ˆë§ˆë‹¤ ì¬ì ‘ì† ì‹œë„
+            TextLogMsg("ì„œë²„ì— ì¬ì ‘ì†ì„ ì‹œë„í•©ë‹ˆë‹¤...");
             ConnectToServer();
         }
     }
@@ -224,28 +220,28 @@ public class TCPClient : MonoBehaviour
                     CloseConnection();
 
                 PlayerControl(receivedMessage);
-
             }
         }
         catch (Exception e)
         {
-            TextLogMsg("µ¥ÀÌÅÍ ¼ö½Å ¿À·ù: " + e.Message);
+            TextLogMsg("ë°ì´í„° ìˆ˜ì‹  ì˜¤ë¥˜: " + e.Message);
         }
     }
 
     public void OnSendMessageToServer(string message)
     {
+        if (!isConnected) return;
         try
         {
             byte[] data = Encoding.ASCII.GetBytes(message);
             stream.Write(data, 0, data.Length);
             stream.Flush();
 
-            TextLogMsg("¼­¹ö·Î ¸Ş½ÃÁö Àü¼Û: " + message);
+            TextLogMsg("ì„œë²„ë¡œ ë©”ì‹œì§€ ì „ì†¡: " + message);
         }
         catch (Exception e)
         {
-            TextLogMsg("¸Ş½ÃÁö Àü¼Û ½ÇÆĞ: " + e.Message);
+            TextLogMsg("ë©”ì‹œì§€ ì „ì†¡ ì‹¤íŒ¨: " + e.Message);
         }
     }
 
@@ -263,13 +259,11 @@ public class TCPClient : MonoBehaviour
         }
         isConnected = false;
         reconnecting = false;
-        TextLogMsg("¿¬°áÀÌ Á¾·áµÇ¾ú½À´Ï´Ù.");
+        TextLogMsg("ì—°ê²°ì´ ì¢…ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.");
     }
 
     private void OnApplicationQuit()
     {
         CloseConnection();
     }
-
-
 }

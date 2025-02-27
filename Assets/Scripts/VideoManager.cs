@@ -2,7 +2,6 @@
 //using System.Windows.Forms;
 #endif
 
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -10,6 +9,9 @@ using Application = UnityEngine.Application;
 
 public class VideoManager : MonoBehaviour
 {
+    [SerializeField]
+    private TCPClient client;
+
     private static VideoManager instance;
 
     public static VideoManager Instance
@@ -30,7 +32,7 @@ public class VideoManager : MonoBehaviour
         if (!Directory.Exists(videoFolderPath))
             Directory.CreateDirectory(videoFolderPath);
 
-        OnSelecteButton(TCPSever.videoNum);
+        OnSelecteButton(1);
     }
 
     private void OpneFileDialog()
@@ -59,7 +61,10 @@ public class VideoManager : MonoBehaviour
 
     public void OnSelecteButton(int index)
     {
+        if (TCPSever.videoNum == index) return;
         TCPSever.videoNum = index;
+        client.OnSendMessageToServer($"load:{TCPSever.videoNum},");
+
         foreach (VideoSelectButton button in videoSelectButtons)
         {
             if (button.index != index)
