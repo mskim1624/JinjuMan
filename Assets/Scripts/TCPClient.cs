@@ -26,8 +26,9 @@ public class TCPClient : MonoBehaviour
     byte[] receiveBuffer = new byte[1024];
 
 
+    //public Text txtIP;
     [SerializeField]
-    Text txtIP;
+    InputField txtIP;
     [SerializeField]
     Button btnConnect;
 
@@ -46,6 +47,7 @@ public class TCPClient : MonoBehaviour
 
     private void Start()
     {
+        txtIP.text = "127.0.0.1";
         btnConnect.enabled = true;
 
         logText = GameObject.Find("log_Text").GetComponent<Text>();
@@ -180,7 +182,7 @@ public class TCPClient : MonoBehaviour
             isConnected = true;
             reconnecting = false;
             TextLogMsg("서버에 연결되었습니다.");
-            OnSendMessageToServer("load:1");
+            OnSendMessageToServer("load:1,");
         }
         catch (Exception e)
         {

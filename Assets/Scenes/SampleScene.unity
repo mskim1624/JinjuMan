@@ -6377,7 +6377,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: pause
+          m_StringArgument: pause,
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1045848628
@@ -8426,7 +8426,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: reset
+          m_StringArgument: reset,
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1281642865
@@ -8951,10 +8951,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 14
+    m_FontSize: 30
     m_FontStyle: 2
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 0
     m_MaxSize: 40
     m_Alignment: 4
     m_AlignByGeometry: 0
@@ -8962,7 +8962,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "IP\uAC12\uC744 \uC785\uB825\uD558\uC138\uC694..."
+  m_Text: 
 --- !u!222 &1335634923
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -9438,7 +9438,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e605b93396bee442a7b6ffa5c400942, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  txtIP: {fileID: 1662768048}
+  txtIP: {fileID: 2038283395}
   btnConnect: {fileID: 935541918}
 --- !u!4 &1424568890
 Transform:
@@ -10164,7 +10164,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: start
+          m_StringArgument: start,
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &1487645127
@@ -14301,7 +14301,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: estop
+          m_StringArgument: estop,
           m_BoolArgument: 0
         m_CallState: 2
 --- !u!114 &2122649410
